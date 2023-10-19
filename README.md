@@ -1,3 +1,19 @@
+# FlutterGPT: An extension to MetaGPT to generate Flutter Apps
+
+### Structure
+
+1. Product Manager
+    - Describes Goals and User Stories, ...
+
+2. Flutter Architect
+    - NEW: Feature List -> Divides the whole project in individual Features
+    - NEW: classDiagram -> Write freezed like class definition
+    - NEW: Define repositories
+
+
+
+
+
 # MetaGPT: The Multi-Agent Framework
 
 <p align="center">

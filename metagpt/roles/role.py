@@ -108,6 +108,7 @@ class Role:
     def _init_actions(self, actions):
         self._reset()
         for idx, action in enumerate(actions):
+            logger.debug(f"Running action {idx} in {self._role_id}")
             if not isinstance(action, Action):
                 i = action("")
             else:

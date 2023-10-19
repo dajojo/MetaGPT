@@ -14,6 +14,8 @@ from metagpt.actions.debug_error import DebugError
 from metagpt.actions.design_api import WriteDesign
 from metagpt.actions.design_api_review import DesignReview
 from metagpt.actions.design_filenames import DesignFilenames
+from metagpt.actions.flutter_design_api import WriteFlutterDesign
+from metagpt.actions.flutter_project_management import WriteFlutterTasks
 from metagpt.actions.project_management import AssignTasks, WriteTasks
 from metagpt.actions.research import CollectLinks, WebBrowseAndSummarize, ConductResearch
 from metagpt.actions.run_code import RunCode
@@ -32,6 +34,7 @@ class ActionType(Enum):
     WRITE_PRD = WritePRD
     WRITE_PRD_REVIEW = WritePRDReview
     WRITE_DESIGN = WriteDesign
+    WRITE_FLUTTER_DESIGN = WriteFlutterDesign
     DESIGN_REVIEW = DesignReview
     DESIGN_FILENAMES = DesignFilenames
     WRTIE_CODE = WriteCode
@@ -40,6 +43,7 @@ class ActionType(Enum):
     RUN_CODE = RunCode
     DEBUG_ERROR = DebugError
     WRITE_TASKS = WriteTasks
+    WRITE_FLUTTER_TASKS = WriteFlutterTasks
     ASSIGN_TASKS = AssignTasks
     SEARCH_AND_SUMMARIZE = SearchAndSummarize
     COLLECT_LINKS = CollectLinks

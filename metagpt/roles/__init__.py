@@ -8,7 +8,9 @@
 
 from metagpt.roles.role import Role
 from metagpt.roles.architect import Architect
+from metagpt.roles.flutter_architect import FlutterArchitect
 from metagpt.roles.project_manager import ProjectManager
+from metagpt.roles.flutter_project_manager import FlutterProjectManager
 from metagpt.roles.product_manager import ProductManager
 from metagpt.roles.engineer import Engineer
 from metagpt.roles.qa_engineer import QaEngineer
@@ -20,7 +22,9 @@ from metagpt.roles.customer_service import CustomerService
 __all__ = [
     "Role",
     "Architect",
+    "FlutterArchitect",
     "ProjectManager",
+    "FlutterProjectManager",
     "ProductManager",
     "Engineer",
     "QaEngineer",

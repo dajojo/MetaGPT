@@ -64,6 +64,7 @@ class Action(ABC):
         system_msgs.append(self.prefix)
         content = await self.llm.aask(prompt, system_msgs)
         logger.debug(content)
+
         output_class = ActionOutput.create_model_class(output_class_name, output_data_mapping)
 
         if format == "json":
@@ -82,6 +83,7 @@ class Action(ABC):
 
         logger.debug(parsed_data)
         instruct_content = output_class(**parsed_data)
+
         return ActionOutput(content, instruct_content)
 
     async def run(self, *args, **kwargs):
