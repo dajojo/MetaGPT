@@ -22,6 +22,9 @@ from metagpt.actions.run_code import RunCode
 from metagpt.actions.search_and_summarize import SearchAndSummarize
 from metagpt.actions.write_code import WriteCode
 from metagpt.actions.write_code_review import WriteCodeReview
+from metagpt.actions.write_flutter_code import WriteFlutterCode
+from metagpt.actions.write_flutter_data_class_code import WriteFlutterDataClassCode
+from metagpt.actions.write_flutter_state_class_code import WriteFlutterStateClassCode
 from metagpt.actions.write_prd import WritePRD
 from metagpt.actions.write_prd_review import WritePRDReview
 from metagpt.actions.write_test import WriteTest
@@ -38,6 +41,9 @@ class ActionType(Enum):
     DESIGN_REVIEW = DesignReview
     DESIGN_FILENAMES = DesignFilenames
     WRTIE_CODE = WriteCode
+    WRTIE_FLUTTER_CODE = WriteFlutterCode
+    WRITE_FLUTTER_DATA_CLASS_CODE = WriteFlutterDataClassCode
+    WRITE_FLUTTER_STATE_CLASS_CODE = WriteFlutterStateClassCode
     WRITE_CODE_REVIEW = WriteCodeReview
     WRITE_TEST = WriteTest
     RUN_CODE = RunCode

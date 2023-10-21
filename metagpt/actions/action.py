@@ -62,8 +62,13 @@ class Action(ABC):
         if not system_msgs:
             system_msgs = []
         system_msgs.append(self.prefix)
+        
+        #logger.info(f"Prompting: {prompt} system: {system_msgs}")
+
         content = await self.llm.aask(prompt, system_msgs)
         logger.debug(content)
+
+        #logger.info("Creating output class")
 
         output_class = ActionOutput.create_model_class(output_class_name, output_data_mapping)
 

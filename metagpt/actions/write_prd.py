@@ -6,6 +6,9 @@
 @File    : write_prd.py
 """
 from typing import List
+import shutil
+from pathlib import Path
+from typing import List,Dict
 
 from metagpt.actions import Action, ActionOutput
 from metagpt.actions.search_and_summarize import SearchAndSummarize
@@ -48,6 +51,8 @@ quadrantChart
 Role: You are a professional product manager; the goal is to design a concise, usable, efficient product
 Requirements: According to the context, fill in the following missing information, each section name is a key in json ,If the requirements are unclear, ensure minimum viability and avoid excessive design
 
+## Project name: Provide as Python str with python triple quote, concise and clear, characters only use a combination of all lowercase and underscores
+
 ## Original Requirements: Provide as Plain text, place the polished complete original requirements here
 
 ## Product Goals: Provided as Python list[str], up to 3 clear, orthogonal product goals. If the requirement itself is simple, the goal should also be simple
@@ -71,6 +76,7 @@ and only output the json inside this tag, nothing else
         "FORMAT_EXAMPLE": """
 [CONTENT]
 {
+    "Project name": "snake_game",
     "Original Requirements": "",
     "Search Information": "",
     "Requirements": "",
@@ -134,6 +140,8 @@ Role: You are a professional product manager; the goal is to design a concise, u
 Requirements: According to the context, fill in the following missing information, note that each sections are returned in Python code triple quote form seperatedly. If the requirements are unclear, ensure minimum viability and avoid excessive design
 ATTENTION: Use '##' to SPLIT SECTIONS, not '#'. AND '## <SECTION_NAME>' SHOULD WRITE BEFORE the code and triple quote. Output carefully referenced "Format example" in format.
 
+## Project name: Provide as Python str with python triple quote, concise and clear, characters only use a combination of all lowercase and underscores
+
 ## Original Requirements: Provide as Plain text, place the polished complete original requirements here
 
 ## Product Goals: Provided as Python list[str], up to 3 clear, orthogonal product goals. If the requirement itself is simple, the goal should also be simple
@@ -153,6 +161,11 @@ ATTENTION: Use '##' to SPLIT SECTIONS, not '#'. AND '## <SECTION_NAME>' SHOULD W
 """,
         "FORMAT_EXAMPLE": """
 ---
+## Project name
+```python
+"snake_game"
+```
+
 ## Original Requirements
 The boss ... 
 
@@ -206,6 +219,7 @@ There are no unclear points.
 }
 
 OUTPUT_MAPPING = {
+    "Project name": (str,...),
     "Original Requirements": (str, ...),
     "Product Goals": (List[str], ...),
     "User Stories": (List[str], ...),
@@ -222,6 +236,16 @@ class WritePRD(Action):
     def __init__(self, name="", context=None, llm=None):
         super().__init__(name, context, llm)
 
+    def recreate_workspace(self, workspace: Path):
+        try:
+            shutil.rmtree(workspace)
+        except FileNotFoundError:
+            pass  # Folder does not exist, but we don't care
+        workspace.mkdir(parents=True, exist_ok=True)
+
+
+
+
     async def run(self, requirements, format=CONFIG.prompt_format, *args, **kwargs) -> ActionOutput:
         sas = SearchAndSummarize()
         # rsp = await sas.run(context=requirements, system_text=SEARCH_AND_SUMMARIZE_SYSTEM_EN_US)
@@ -236,6 +260,13 @@ class WritePRD(Action):
             requirements=requirements, search_information=info, format_example=format_example
         )
         logger.debug(prompt)
-        # prd = await self._aask_v1(prompt, "prd", OUTPUT_MAPPING)
+
         prd = await self._aask_v1(prompt, "prd", OUTPUT_MAPPING, format=format)
+
+        setattr(
+            prd.instruct_content,
+            "Project name",
+            prd.instruct_content.dict()["Project name"].strip().strip("'").strip('"'),
+        )
+
         return prd

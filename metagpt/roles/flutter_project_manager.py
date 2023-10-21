@@ -2,9 +2,18 @@
 # -*- coding: utf-8 -*-
 
 
+from metagpt.actions.action_output import ActionOutput
 from metagpt.actions.flutter_design_api import WriteFlutterDesign
+from metagpt.actions.flutter_frontend_design_api import WriteFlutterFrontendDesign
 from metagpt.actions.flutter_project_management import WriteFlutterTasks
+from metagpt.actions.write_prd import WritePRD
 from metagpt.roles import Role
+from metagpt.roles.product_manager import get_workspace
+
+from metagpt.schema import Message
+from metagpt.logs import logger
+from metagpt.utils.common import CodeParser
+from metagpt.utils.json_to_markdown import json_to_markdown
 
 
 class FlutterProjectManager(Role):
@@ -36,4 +45,32 @@ class FlutterProjectManager(Role):
         """
         super().__init__(name, profile, goal, constraints)
         self._init_actions([WriteFlutterTasks])
-        self._watch([WriteFlutterDesign])
+        self._watch([WriteFlutterFrontendDesign])
+
+    def _save(self, ws, context, rsp):
+
+        file_path = ws / "docs/api_spec_and_tasks.md"
+        file_path.write_text(json_to_markdown(rsp.instruct_content.dict()))
+        logger.info(f"Saved tasks to: {file_path}")
+
+
+    async def _act(self) -> Message:
+
+        logger.info(f"{self._setting}: ready to {self._rc.todo}")
+
+        context = self._rc.important_memory
+        response = await self._rc.todo.run(context)
+        
+        if isinstance(response, ActionOutput):
+            msg = Message(content=response.content, instruct_content=response.instruct_content,
+                        role=self.profile, cause_by=type(self._rc.todo))
+        else:
+            msg = Message(content=response, role=self.profile, cause_by=type(self._rc.todo))
+        self._rc.memory.add(msg)
+
+        ws = get_workspace(self)  
+        logger.info(f"Workspace: {ws}")
+
+        self._save(ws,context,msg)
+
+        return msg
