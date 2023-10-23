@@ -28,7 +28,7 @@ ATTENTION: Use '##' to SPLIT SECTIONS, not '#'. Output format carefully referenc
 4. Attention2: YOU MUST FOLLOW DEFINITIONS. DONT CHANGE ANY DESIGN.
 5. Attention3: Use the freezed to pattern to implement data classes. 
 6. Think before writing: What should be implemented and provided in this document?
-7. ONLY IMPLEMENT ONE DATA CLASS PER FILE.
+7. ONLY IMPLEMENT ONE REPOSITORY CLASS PER FILE.
 8. Never include any functions
 -----
 # Context
@@ -134,5 +134,5 @@ class WriteFlutterRepositoryClassCode(Action):
         prompt = PROMPT_TEMPLATE.format(context=context, filename=filename)
         logger.info(f'Writing Repository class {filename}..')
         code = await self.write_code(prompt)
-        return code
+        return code,prompt
     

@@ -57,5 +57,5 @@ class WriteFlutterCode(Action):
         prompt = PROMPT_TEMPLATE.format(context=context, filename=filename)
         logger.info(f'Writing Code {filename}..')
         code = await self.write_code(prompt)
-        return code
+        return code, prompt
     

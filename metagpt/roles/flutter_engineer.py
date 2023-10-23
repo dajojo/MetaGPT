@@ -15,6 +15,7 @@ from metagpt.actions.flutter_design_api import WriteFlutterDesign
 from metagpt.actions.flutter_frontend_design_api import WriteFlutterFrontendDesign
 from metagpt.actions.flutter_project_management import WriteFlutterTasks
 from metagpt.actions.write_flutter_code import WriteFlutterCode
+from metagpt.actions.write_flutter_code_review import WriteFlutterCodeReview
 from metagpt.actions.write_flutter_data_class_code import WriteFlutterDataClassCode
 from metagpt.actions.write_flutter_repository_class_code import WriteFlutterRepositoryClassCode
 from metagpt.actions.write_flutter_screen_class_code import WriteFlutterScreenClassCode
@@ -25,7 +26,7 @@ from metagpt.roles import Role
 from metagpt.schema import Message
 from metagpt.utils.common import CodeParser
 from metagpt.utils.special_tokens import FILENAME_CODE_SEP, MSG_SEP
-from metagpt.flutter_common import get_workspace
+from metagpt.flutter_common import get_workspace, to_camel_case
 import re
 
 async def gather_ordered_k(coros, k) -> list:
@@ -83,7 +84,7 @@ class FlutterEngineer(Role):
         self._init_actions([WriteFlutterCode])
         self.use_code_review = use_code_review
         if self.use_code_review:
-            self._init_actions([WriteFlutterCode, WriteCodeReview])
+            self._init_actions([WriteFlutterCode, WriteFlutterCodeReview])
         self._watch([WriteFlutterTasks])
         self.todos = []
         self.n_borg = n_borg
@@ -135,9 +136,6 @@ class FlutterEngineer(Role):
         return content
 
 
-
-
-
     def write_file(self, filename: str, code: str):
         workspace = get_workspace(self)
         filename = filename.replace('"', "").replace("\n", "")
@@ -182,52 +180,79 @@ class FlutterEngineer(Role):
         tree = self.get_file_tree(frontend_sys_spec)
 
         for todo in self.todos:
+            todo_file_name = to_camel_case(Path(todo).name)[:-4]
+
             if "/domain/" in todo:
                 ## data class
-                data_class = Path(todo).name
+                data_class = todo_file_name
                 sys_spec = self.read_markdown_file(ws/ "docs"/ "system_design.md")
                 class_spec = self.get_class_spec(data_class,sys_spec)
                 if class_spec != None:
                     context = tree +"\n"+class_spec
                 else:
+                    logger.warning(f"Warning! Using full history for {todo} {data_class}")
                     context = self._rc.history
-                code = await WriteFlutterDataClassCode().run(context=context, filename=todo)
-
-            if "/repositories/" in todo:
-                ## data class
-                data_class = Path(todo).name
+                code, prompt = await WriteFlutterDataClassCode().run(context=context, filename=todo)
+            
+            elif "/repositories/" in todo:
+                ## repository class
+                repository_class = todo_file_name ### user_repository
                 sys_spec = self.read_markdown_file(ws/ "docs"/ "system_design.md")
-                class_spec = self.get_class_spec(data_class,sys_spec)
+                class_spec = self.get_class_spec(repository_class,sys_spec)
                 if class_spec != None:
                     context = tree +"\n"+class_spec
                 else:
+                    logger.warning(f"Warning! Using full history for {todo}")
                     context = self._rc.history
-                code = await WriteFlutterRepositoryClassCode().run(context=context, filename=todo)
+                code, prompt = await WriteFlutterRepositoryClassCode().run(context=context, filename=todo)
 
             elif "/states/" in todo:
-                state_class = Path(todo).name
+                ## state class 
+                state_class = todo_file_name
                 class_spec = self.get_class_spec(state_class,frontend_sys_spec)
                 if class_spec != None:
                     context = tree +"\n"+class_spec
                 else:
+                    logger.warning(f"Warning! Using full history for {todo}")
                     context = self._rc.history
-                code = await WriteFlutterStateClassCode().run(context=context, filename=todo)
+                code, prompt = await WriteFlutterStateClassCode().run(context=context, filename=todo)
+
+            elif "/controller/" in todo:
+                ## controller class
+                state_class = todo_file_name
+                class_spec = self.get_class_spec(state_class,frontend_sys_spec)
+                if class_spec != None:
+                    context = tree +"\n"+class_spec
+                else:
+                    logger.warning(f"Warning! Using full history for {todo}")
+                    context = self._rc.history
+                code, prompt = await WriteFlutterStateClassCode().run(context=context, filename=todo)
 
             elif "/screens/" in todo:
-                state_class = Path(todo).name
-                class_spec = self.get_class_spec(state_class,frontend_sys_spec)
-                if class_spec != None:
-                    context = tree +"\n"+class_spec
-                else:
-                    context = self._rc.history
-                code = await WriteFlutterScreenClassCode().run(context=context, filename=todo)
+                # screen_class = Path(todo).name
+                # class_spec = self.get_class_spec(state_class,frontend_sys_spec)
+                # if class_spec != None:
+                context = frontend_sys_spec
+                # else:
+                #     logger.warning(f"Warning! Using full history for {todo}")
+                #     context = self._rc.history
+                code, prompt = await WriteFlutterScreenClassCode().run(context=context, filename=todo)
 
             else:
-                logger.warning(f"Attention! Using Generic Flutter Code writing for {todo}")
-                code = await WriteFlutterCode().run(context=self._rc.history, filename=todo)
+                logger.warning(f"Warning! Using Generic Flutter Code writing for {todo}")
+                context = frontend_sys_spec#self._rc.history
+                code, prompt = await WriteFlutterCode().run(context=context, filename=todo)
             
             logger.info(todo)
             #logger.info(code)
+
+            if self.use_code_review:
+                try:
+                    rewrite_code = await WriteFlutterCodeReview().run(context=context,initial_prompt=prompt, filename=todo, code=code)
+                    code = rewrite_code
+                except Exception as e:
+                    logger.error("code review failed!", e)
+                    pass
 
             file_path = self.write_file(todo, code)
             msg = Message(content=code, role=self.profile, cause_by=type(self._rc.todo))
@@ -242,46 +267,46 @@ class FlutterEngineer(Role):
         )
         return msg
 
-    async def _act_sp_precision(self) -> Message:
-        code_msg_all = []  # gather all code info, will pass to qa_engineer for tests later
-        for todo in self.todos:
-            """
-            # Select essential information from the historical data to reduce the length of the prompt (summarized from human experience):
-            1. All from Architect
-            2. All from ProjectManager
-            3. Do we need other codes (currently needed)?
-            TODO: The goal is not to need it. After clear task decomposition, based on the design idea, you should be able to write a single file without needing other codes. If you can't, it means you need a clearer definition. This is the key to writing longer code.
-            """
-            context = []
-            msg = self._rc.memory.get_by_actions([WriteFlutterDesign, WriteFlutterFrontendDesign, WriteFlutterTasks, WriteFlutterCode])
-            for m in msg:
-                context.append(m.content)
-            context_str = "\n".join(context)
-            # Write code
-            code = await WriteFlutterCode().run(context=context_str, filename=todo)
-            # Code review
-            if self.use_code_review:
-                try:
-                    rewrite_code = await WriteCodeReview().run(context=context_str, code=code, filename=todo)
-                    code = rewrite_code
-                except Exception as e:
-                    logger.error("code review failed!", e)
-                    pass
-            file_path = self.write_file(todo, code)
-            msg = Message(content=code, role=self.profile, cause_by=WriteCode)
-            self._rc.memory.add(msg)
+    # async def _act_sp_precision(self) -> Message:
+    #     code_msg_all = []  # gather all code info, will pass to qa_engineer for tests later
+    #     for todo in self.todos:
+    #         """
+    #         # Select essential information from the historical data to reduce the length of the prompt (summarized from human experience):
+    #         1. All from Architect
+    #         2. All from ProjectManager
+    #         3. Do we need other codes (currently needed)?
+    #         TODO: The goal is not to need it. After clear task decomposition, based on the design idea, you should be able to write a single file without needing other codes. If you can't, it means you need a clearer definition. This is the key to writing longer code.
+    #         """
+    #         context = []
+    #         msg = self._rc.memory.get_by_actions([WriteFlutterDesign, WriteFlutterFrontendDesign, WriteFlutterTasks, WriteFlutterCode])
+    #         for m in msg:
+    #             context.append(m.content)
+    #         context_str = "\n".join(context)
+    #         # Write code
+    #         code = await WriteFlutterCode().run(context=context_str, filename=todo)
+    #         # Code review
+    #         if self.use_code_review:
+    #             try:
+    #                 rewrite_code = await WriteFlutterCodeReview().run(context=context_str, code=code, filename=todo)
+    #                 code = rewrite_code
+    #             except Exception as e:
+    #                 logger.error("code review failed!", e)
+    #                 pass
+    #         file_path = self.write_file(todo, code)
+    #         msg = Message(content=code, role=self.profile, cause_by=WriteCode)
+    #         self._rc.memory.add(msg)
 
-            code_msg = todo + FILENAME_CODE_SEP + str(file_path)
-            code_msg_all.append(code_msg)
+    #         code_msg = todo + FILENAME_CODE_SEP + str(file_path)
+    #         code_msg_all.append(code_msg)
 
-        logger.info(f"Done {self.get_workspace()} generating.")
-        msg = Message(
-            content=MSG_SEP.join(code_msg_all), role=self.profile, cause_by=type(self._rc.todo), send_to="QaEngineer"
-        )
-        return msg
+    #     logger.info(f"Done {self.get_workspace()} generating.")
+    #     msg = Message(
+    #         content=MSG_SEP.join(code_msg_all), role=self.profile, cause_by=type(self._rc.todo), send_to="FlutterQaEngineer"
+    #     )
+    #     return msg
 
     async def _act(self) -> Message:
         """Determines the mode of action based on whether code review is used."""
-        if self.use_code_review:
-            return await self._act_sp_precision()
+        # if self.use_code_review:
+        #     return await self._act_sp_precision()
         return await self._act_sp()

@@ -42,9 +42,10 @@ class SoftwareCompany(BaseModel):
         if CONFIG.total_cost > CONFIG.max_budget:
             raise NoMoneyException(CONFIG.total_cost, f'Insufficient funds: {CONFIG.max_budget}')
 
-    def start_project(self, idea):
+    def start_project(self, idea, project_name):
         """Start a project from publishing boss requirement."""
         self.idea = idea
+        self.environment.project_name = project_name
         self.environment.publish_message(Message(role="BOSS", content=idea, cause_by=BossRequirement))
 
     def _save(self):

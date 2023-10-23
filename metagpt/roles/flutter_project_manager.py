@@ -3,6 +3,7 @@
 
 
 from metagpt.actions.action_output import ActionOutput
+from metagpt.actions.add_requirement import BossRequirement
 from metagpt.actions.flutter_design_api import WriteFlutterDesign
 from metagpt.actions.flutter_frontend_design_api import WriteFlutterFrontendDesign
 from metagpt.actions.flutter_project_management import WriteFlutterTasks
@@ -44,7 +45,7 @@ class FlutterProjectManager(Role):
         """
         super().__init__(name, profile, goal, constraints)
         self._init_actions([WriteFlutterTasks])
-        self._watch([WriteFlutterFrontendDesign])
+        self._watch([BossRequirement])
 
     def _save(self, ws, context, rsp):
 
@@ -52,12 +53,27 @@ class FlutterProjectManager(Role):
         file_path.write_text(json_to_markdown(rsp.instruct_content.dict()))
         logger.info(f"Saved tasks to: {file_path}")
 
-
+    def read_markdown_file(self,filename):
+        with open(filename, 'r') as file:
+            content = file.read()
+        return content
+    
     async def _act(self) -> Message:
 
         logger.info(f"{self._setting}: ready to {self._rc.todo}")
 
-        context = self._rc.important_memory
+        #context = self._rc.important_memory
+        
+        #### load prd and requirements as context
+        ws = get_workspace(self)
+
+        frontend_sys_spec = self.read_markdown_file(ws/ "docs"/ "frontend_system_design.md")
+        sys_spec = self.read_markdown_file(ws/ "docs"/ "system_design.md")
+        prd = self.read_markdown_file(ws/ "docs"/ "prd.md")
+
+        context = prd +"\n"+sys_spec +"\n"+frontend_sys_spec
+
+
         response = await self._rc.todo.run(context)
         
         if isinstance(response, ActionOutput):
@@ -67,7 +83,6 @@ class FlutterProjectManager(Role):
             msg = Message(content=response, role=self.profile, cause_by=type(self._rc.todo))
         self._rc.memory.add(msg)
 
-        ws = get_workspace(self)  
         logger.info(f"Workspace: {ws}")
 
         self._save(ws,context,msg)

@@ -8,8 +8,8 @@
 
 from metagpt.actions import WritePRD
 from metagpt.actions.action_output import ActionOutput
-from metagpt.actions.design_api_review import DesignReview
 from metagpt.actions.flutter_design_api import WriteFlutterDesign
+from metagpt.actions.write_flutter_design_review import WriteFlutterDesignReview
 from metagpt.roles import Role
 from metagpt.flutter_common import get_workspace
 from metagpt.schema import Message
@@ -40,7 +40,7 @@ class FlutterArchitect(Role):
         super().__init__(name, profile, goal, constraints)
 
         # Initialize actions specific to the Architect role
-        self._init_actions([WriteFlutterDesign])
+        self._init_actions([WriteFlutterDesign,WriteFlutterDesignReview])
 
         # Set events or actions the Architect should watch or be aware of
         self._watch({WritePRD})
@@ -82,7 +82,14 @@ class FlutterArchitect(Role):
 
         context = self._rc.important_memory
         response = await self._rc.todo.run(context)
-        
+
+        try:
+            response = await WriteFlutterDesignReview().run(context=context, design=response)
+        except Exception as e:
+            logger.error("code review failed!", e)
+            pass
+
+
         if isinstance(response, ActionOutput):
             msg = Message(content=response.content, instruct_content=response.instruct_content,
                         role=self.profile, cause_by=type(self._rc.todo))

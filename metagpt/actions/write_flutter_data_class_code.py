@@ -29,7 +29,7 @@ ATTENTION: Use '##' to SPLIT SECTIONS, not '#'. Output format carefully referenc
 5. Attention3: Use the freezed to pattern to implement data classes. 
 6. Think before writing: What should be implemented and provided in this document?
 7. ONLY IMPLEMENT ONE DATA CLASS PER FILE.
-8. NEVER use the required annotation. ALWAYS make it nullable using the question mark annotation
+8. NEVER use the 'required' annotation. ALWAYS make it nullable using the 'Type?' annotation.
 9. All id, createdAt, updatedAt are mandatory. @SampleTypeConverter is necessary if custom enums are used.
 10. Never include any functions
 -----
@@ -84,5 +84,5 @@ class WriteFlutterDataClassCode(Action):
         prompt = PROMPT_TEMPLATE.format(context=context, filename=filename)
         logger.info(f'Writing Data class {filename}..')
         code = await self.write_code(prompt)
-        return code
+        return code, prompt
     

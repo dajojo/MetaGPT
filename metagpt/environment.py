@@ -24,6 +24,8 @@ class Environment(BaseModel):
     roles: dict[str, Role] = Field(default_factory=dict)
     memory: Memory = Field(default_factory=Memory)
     history: str = Field(default='')
+    project_name:str = Field(default='unnamed')
+
 
     class Config:
         arbitrary_types_allowed = True

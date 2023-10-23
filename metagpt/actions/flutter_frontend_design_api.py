@@ -85,7 +85,7 @@ and only output the json inside this tag, nothing else
     },
     "State classes": '
     classDiagram
-        class SampleState extends EntityListStateNotifier{
+        class SampleState extends EntityListStateNotifier OR EntityStateNotifier{
             listenTo([OtherSampleState,OtherSampleState2])
             sampleMethod1()
             AddAnotherInstanceSample()
@@ -204,7 +204,7 @@ Attention: DONT USE triple dots like "..." Include all necessary information!
 ## State classes
 ```mermaid
 classDiagram
-    class SampleState {
+        class SampleState extends EntityListStateNotifier OR EntityStateNotifier{
         listenTo([OtherSampleState,OtherSampleState2])
         sampleMethod1()
         AddAnotherInstanceSample()

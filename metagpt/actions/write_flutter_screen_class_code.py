@@ -26,7 +26,7 @@ ATTENTION: Use '##' to SPLIT SECTIONS, not '#'. Output format carefully referenc
 5. Attention3: If the file contains a data class: use the freezed to pattern to implement it. 
 6. Think before writing: What should be implemented and provided in this document?
 7. CAREFULLY CHECK THAT YOU DONT MISS ANY NECESSARY CLASS/FUNCTION IN THIS FILE.
-8. ONLY IMPLEMENT ONE STATE CLASS PER FILE. DON'T FORGET the provider variable
+8. ONLY IMPLEMENT ONE SCREEN CLASS PER FILE.
 9. Use the ResponseCollection if the state holds a list of data entities. 
 10. USE either ConsumerStatefulWidget OR ConsumerWidget
 -----
@@ -77,5 +77,5 @@ class WriteFlutterScreenClassCode(Action):
         code = await self.write_code(prompt)
         # code_rsp = await self._aask_v1(prompt, "code_rsp", OUTPUT_MAPPING)
         # self._save(context, filename, code)
-        return code
+        return code,prompt
     

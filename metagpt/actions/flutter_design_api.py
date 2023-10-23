@@ -35,7 +35,7 @@ Attention: DONT USE triple dots like "..." Include all necessary information!
 
 ## Implementation approach: Provide as Plain text. Analyze the difficult points of the requirements, select the appropriate open-source framework.
 
-## Feature list: Provided as Python dict[str,str], the keys represent the individual app specific features that are needed and have at least one dedicated screen and a dedicated function (DONT INCLUDE COMMON and OBVIOUS FEATURES SUCH AS 'Connection Service' or 'User Interface'). The values contain a brief description for each feature about the functionality and the assigned data classes, and functions. Each data class can be assigned to only one feature..
+## Feature list: Provided as Python dict[str,str], the keys represent the individual app specific features that are needed and have at least one dedicated screen and a dedicated function (DONT INCLUDE COMMON and OBVIOUS FEATURES SUCH AS 'Connection Service' or 'User Interface'). The values contain a brief description for each feature about the functionality and the assigned data classes, and functions. Each data and state class can be assigned to only one feature. Use lower_snake_case.
 
 ## Data classes: Use classDiagram code syntax, including classes (with type annotations), CLEARLY MARK the RELATIONSHIPS between classes, and comply with professional standards. The data structures SHOULD BE VERY DETAILED and the API should be comprehensive with a complete design. 
 
@@ -87,7 +87,7 @@ Attention: DONT USE triple dots like "..." Include all necessary information!
 
 ## Implementation approach: Provide as Plain text. Analyze the difficult points of the requirements, select the appropriate open-source framework.
 
-## Feature list: Provided as Python dict[str,str], the keys represent the individual app specific features that are needed and have at least one dedicated screen and a dedicated function (DONT INCLUDE COMMON and OBVIOUS FEATURES SUCH AS 'Connection Service' or 'User Interface'). The values contain a brief description for each feature about the functionality and the assigned data classes, and functions. Each data class can be assigned to only one feature..
+## Feature list: Provided as Python dict[str,str], the keys represent the individual app specific features that are needed and have at least one dedicated screen and a dedicated function (DONT INCLUDE COMMON and OBVIOUS FEATURES SUCH AS 'Connection Service' or 'User Interface'). The values contain a brief description for each feature about the functionality and the assigned data classes, and functions. Each data and state class can be assigned to only one feature. Use lower_snake_case.
 
 ## Data classes: Use classDiagram code syntax, including classes (with type annotations), CLEARLY MARK the RELATIONSHIPS between classes, and comply with professional standards. The data structures SHOULD BE VERY DETAILED and the API should be comprehensive with a complete design. 
 
