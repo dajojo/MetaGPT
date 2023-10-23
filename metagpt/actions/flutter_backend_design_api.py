@@ -11,6 +11,7 @@ from metagpt.actions.flutter_design_api import WriteFlutterDesign
 from metagpt.config import CONFIG
 from metagpt.const import WORKSPACE_ROOT
 from metagpt.logs import logger
+from metagpt.flutter_common import get_workspace
 from metagpt.utils.common import CodeParser
 from metagpt.utils.get_template import get_template
 from metagpt.utils.json_to_markdown import json_to_markdown
@@ -128,17 +129,10 @@ class WriteFlutterBackendDesign(Action):
     def __init__(self, name, context=None, llm=None):
         super().__init__(name, context, llm)
         self.desc = (
-            "Based on the Architecture Design, think about the frontend system design, and design the corresponding flutter project file structure, state classes, screens, components and view controller."
+            "Based on the Architecture Design, think about the backend system design, and design the corresponding flutter project file structure, state classes, screens, components and view controller."
             "Use the Riverpod state management library for state classes and view controllers."
             "Please provide your design, feedback clearly and in detail."
         )
-
-    def recreate_workspace(self, workspace: Path):
-        try:
-            shutil.rmtree(workspace)
-        except FileNotFoundError:
-            pass  # Folder does not exist, but we don't care
-        workspace.mkdir(parents=True, exist_ok=True)
 
     async def _save_system_design(self, docs_path, resources_path, system_design):
         data_classes = system_design.instruct_content.dict()[
@@ -149,21 +143,12 @@ class WriteFlutterBackendDesign(Action):
         ]  # CodeParser.parse_code(block="Program call flow", text=content)
         await mermaid_to_file(data_classes, resources_path / "state_classes")
         await mermaid_to_file(repository_classes, resources_path / "device_api_classes")
-        system_design_file = docs_path / "frontend_system_design.md"
+        system_design_file = docs_path / "backend_system_design.md"
         logger.info(f"Saving System Designs to {system_design_file}")
         system_design_file.write_text((json_to_markdown(system_design.instruct_content.dict())))
 
     async def _save(self, context, system_design):
-
-        #content = context[-1].content
-        #regex = r'''(?<=Flutter package name": ")(.*)(?=",)'''
-        #ws_name = re.findall(regex, content)[0].strip()
-
-        design = [i for i in context if i.cause_by == WriteFlutterDesign][0]
-        ws_name = CodeParser.parse_str(block="Flutter package name", text=design.content)
-
-        workspace = WORKSPACE_ROOT / ws_name
-        self.recreate_workspace(workspace)
+        workspace = get_workspace(self)
         docs_path = workspace / "docs"
         resources_path = workspace / "resources"
         docs_path.mkdir(parents=True, exist_ok=True)
@@ -175,7 +160,7 @@ class WriteFlutterBackendDesign(Action):
         prompt = prompt_template.format(context=context, format_example=format_example)
 
         # system_design = await self._aask(prompt)
-        system_design = await self._aask_v1(prompt, "frontend_system_design", OUTPUT_MAPPING, format=format)
+        system_design = await self._aask_v1(prompt, "backend_system_design", OUTPUT_MAPPING, format=format)
         # fix Flutter package name, we can't system_design.instruct_content.python_package_name = "xxx" since "Flutter package name" contain space, have to use setattr
         
         await self._save(context, system_design)

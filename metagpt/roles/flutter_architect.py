@@ -11,7 +11,7 @@ from metagpt.actions.action_output import ActionOutput
 from metagpt.actions.design_api_review import DesignReview
 from metagpt.actions.flutter_design_api import WriteFlutterDesign
 from metagpt.roles import Role
-from metagpt.roles.product_manager import get_workspace
+from metagpt.flutter_common import get_workspace
 from metagpt.schema import Message
 from metagpt.utils.json_to_markdown import json_to_markdown
 from metagpt.utils.common import CodeParser

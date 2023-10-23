@@ -16,7 +16,7 @@ from metagpt.actions import (
     WriteDesign,
     WriteTest,
 )
-from metagpt.const import WORKSPACE_ROOT
+from metagpt.flutter_common import get_workspace
 from metagpt.logs import logger
 from metagpt.roles import Role
 from metagpt.schema import Message
@@ -41,25 +41,9 @@ class FlutterQaEngineer(Role):
         self.test_round = 0
         self.test_round_allowed = test_round_allowed
 
-    @classmethod
-    def parse_workspace(cls, system_design_msg: Message) -> str:
-        if system_design_msg.instruct_content:
-            return system_design_msg.instruct_content.dict().get("Flutter package name")
-        return CodeParser.parse_str(block="Flutter package name", text=system_design_msg.content)
-
-    def get_workspace(self, return_proj_dir=True) -> Path:
-        msg = self._rc.memory.get_by_action(WriteDesign)[-1]
-        if not msg:
-            return WORKSPACE_ROOT / "src"
-        workspace = self.parse_workspace(msg)
-        # project directory: workspace/{package_name}, which contains package source code folder, tests folder, resources folder, etc.
-        if return_proj_dir:
-            return WORKSPACE_ROOT / workspace
-        # development codes directory: workspace/{package_name}/{package_name}
-        return WORKSPACE_ROOT / workspace / workspace
 
     def write_file(self, filename: str, code: str):
-        workspace = self.get_workspace() / "tests"
+        workspace = get_workspace(self) / "tests"
         file = workspace / filename
         file.parent.mkdir(parents=True, exist_ok=True)
         file.write_text(code)

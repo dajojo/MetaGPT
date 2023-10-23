@@ -8,11 +8,10 @@ from metagpt.actions.flutter_frontend_design_api import WriteFlutterFrontendDesi
 from metagpt.actions.flutter_project_management import WriteFlutterTasks
 from metagpt.actions.write_prd import WritePRD
 from metagpt.roles import Role
-from metagpt.roles.product_manager import get_workspace
 
 from metagpt.schema import Message
 from metagpt.logs import logger
-from metagpt.utils.common import CodeParser
+from metagpt.flutter_common import get_workspace
 from metagpt.utils.json_to_markdown import json_to_markdown
 
 

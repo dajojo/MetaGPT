@@ -24,6 +24,8 @@ from metagpt.actions.write_code import WriteCode
 from metagpt.actions.write_code_review import WriteCodeReview
 from metagpt.actions.write_flutter_code import WriteFlutterCode
 from metagpt.actions.write_flutter_data_class_code import WriteFlutterDataClassCode
+from metagpt.actions.write_flutter_repository_class_code import WriteFlutterRepositoryClassCode
+from metagpt.actions.write_flutter_screen_class_code import WriteFlutterScreenClassCode
 from metagpt.actions.write_flutter_state_class_code import WriteFlutterStateClassCode
 from metagpt.actions.write_prd import WritePRD
 from metagpt.actions.write_prd_review import WritePRDReview
@@ -44,6 +46,8 @@ class ActionType(Enum):
     WRTIE_FLUTTER_CODE = WriteFlutterCode
     WRITE_FLUTTER_DATA_CLASS_CODE = WriteFlutterDataClassCode
     WRITE_FLUTTER_STATE_CLASS_CODE = WriteFlutterStateClassCode
+    WRITE_FLUTTER_REPOSITORY_CLASS_CODE = WriteFlutterRepositoryClassCode
+    WRITE_FLUTTER_SCREEN_CLASS_CODE = WriteFlutterScreenClassCode
     WRITE_CODE_REVIEW = WriteCodeReview
     WRITE_TEST = WriteTest
     RUN_CODE = RunCode

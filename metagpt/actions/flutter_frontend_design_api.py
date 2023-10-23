@@ -30,9 +30,13 @@ Requirement: Fill in the following missing information based on the context, eac
 Max Output: 8192 chars or 2048 tokens. Try to use them up.
 Attention: DONT USE triple dots like "..." Include all necessary information!
 
+## File tree: Provided as Python dict[str,dict], specify the content of the flutter lib directory. Use a feature based approach where you assign each feature a directory containing the domain, repository, states, screens and view controllers. Use only features that are defined in the feature list!. Every filename must map to a brief description containing only one sentence. Every state and repository can only be introduced once!. Folder names domain, states, repositories, screens and controllers must not be changed!
+
 ## State classes: Use classDiagram code syntax, including state classes (with type annotations), CLEARLY MARK the RELATIONSHIPS between classes (listen hierarchy), and comply with professional standards. The state structures SHOULD BE VERY DETAILED and the API should be comprehensive with a complete design. 
 
-## File tree: Provided as Python dict[str,dict], specify the content of the flutter lib directory. Use a feature based approach where you assign each feature a directory containing the domain, repository, states, screens and view controllers. Use only features that are defined in the feature list!. Every filename must map to a brief description containing only one sentence. Every state and repository can only be introduced once!. Folder names domain, states, repositories, screens and controllers must not be changed!
+## Controller: Use classDiagram code syntax, including controller classes (with type annotations), CLEARLY MARK the RELATIONSHIPS between classes (listen hierarchy), and comply with professional standards. The state structures SHOULD BE VERY DETAILED and the API should be comprehensive with a complete design. 
+
+## Screens: Use classDiagram code syntax, including screens classes (with type annotations), CLEARLY MARK the RELATIONSHIPS between classes (listen hierarchy), and comply with professional standards. The state structures SHOULD BE VERY DETAILED and the API should be comprehensive with a complete design. Also specify if stateful or stateless has to be used.
 
 ## Device API classes: Use classDiagram code syntax, including a Device API Repository for necessary device apis such as Media Gallery, Camera, Sensors, Location,... Defining a communication interface to the Hardware (with type annotations). Comply with professional standards. The data structures SHOULD BE VERY DETAILED and the API should be comprehensive with a complete design. Dont include any Backend APIs since they are already covered. 
 
@@ -44,16 +48,6 @@ and only output the json inside this tag, nothing else
         "FORMAT_EXAMPLE": """
 [CONTENT]
 {
-    "State classes": '
-    classDiagram
-        class SampleState {
-            listenTo([OtherSampleState,OtherSampleState2])
-            sampleMethod1()
-            AddAnotherInstanceSample()
-            ...
-        }
-        ...
-    ',
     "File tree": 
     {"lib" : {
         "main.dart": "runApp and other stuff...", 
@@ -81,11 +75,47 @@ and only output the json inside this tag, nothing else
                     {
                         "sample_view_controller.dart": "Controller for sample_screen.dart"
                     },
+                "components":
+                    {
+                        "sample_button.dart": "Special button used for screens in this feature"
+                    },
                 }
             }
         }
     },
+    "State classes": '
+    classDiagram
+        class SampleState extends EntityListStateNotifier{
+            listenTo([OtherSampleState,OtherSampleState2])
+            sampleMethod1()
+            AddAnotherInstanceSample()
+            ...
+        }
+        ...
+    ',
 
+    "Controller": '
+    classDiagram
+        class SampleController {
+            listenTo([OtherSampleState,OtherSampleState2])
+            sampleMethod1()
+            AddAnotherInstanceSample()
+            validateSampleTextInput1()
+            ...
+        }
+        ...
+    ',
+
+    "Screens": '
+    classDiagram
+        class SampleScreen extends StatelessConsumer {
+            listenTo([SampleController])
+            onSampleButtonClick1()
+            onTextEdited2()
+            ...
+        }
+        ...
+    ',
     "Device API classes": '
     classDiagram
         class MediaApi {
@@ -117,9 +147,13 @@ Max Output: 8192 chars or 2048 tokens. Try to use them up.
 Attention: Use '##' to split sections, not '#', and '## <SECTION_NAME>' SHOULD WRITE BEFORE the code and triple quote.
 Attention: DONT USE triple dots like "..." Include all necessary information!
 
-## State classes: Use classDiagram code syntax, including state classes (with type annotations), CLEARLY MARK the RELATIONSHIPS between classes (listen hierarchy), and comply with professional standards. The state structures SHOULD BE VERY DETAILED and the API should be comprehensive with a complete design. 
+## File tree: Provided as Python dict[str,dict], specify the content of the flutter lib directory. Use a feature based approach where you assign each feature a directory containing the domain, repository, states, screens and view controllers. Use only features that are defined in the feature list!. Every filename must map to a brief description containing only one sentence. Every STATE and REPOSITORY FILE must only be introduced ONCE!. Folder names domain, states, repositories, screens and controllers must not be changed!
 
-## File tree: Provided as Python dict[str,dict], specify the content of the flutter lib directory. Use a feature based approach where you assign each feature a directory containing the domain, repository, states, screens and view controllers. Use only features that are defined in the feature list!. Every filename must map to a brief description containing only one sentence. Every state and repository can only be introduced once!. Folder names domain, states, repositories, screens and controllers must not be changed!
+## State classes: Use classDiagram code syntax, including state classes (with type annotations), CLEARLY MARK the RELATIONSHIPS between classes (listen hierarchy), and comply with professional standards. The state structures SHOULD BE VERY DETAILED and the API should be comprehensive with a complete design. The state will be stored as a Riverpod AsyncValue which handles Error and loading states.
+
+## Controller: Use classDiagram code syntax, including controller classes (with type annotations), CLEARLY MARK the RELATIONSHIPS between classes (listen hierarchy), and comply with professional standards. The state structures SHOULD BE VERY DETAILED and the API should be comprehensive with a complete design. 
+
+## Screens: Use classDiagram code syntax, including screens classes (with type annotations), CLEARLY MARK the RELATIONSHIPS between classes (listen hierarchy), and comply with professional standards. The state structures SHOULD BE VERY DETAILED and the API should be comprehensive with a complete design. Also specify if stateful or stateless has to be used.
 
 ## Device API classes: Use classDiagram code syntax, including a Device API Repository for necessary device apis such as Media Gallery, Camera, Sensors, Location,... Defining a communication interface to the Hardware (with type annotations). Comply with professional standards. The data structures SHOULD BE VERY DETAILED and the API should be comprehensive with a complete design. Dont include any Backend APIs since they are already covered. 
 
@@ -128,19 +162,6 @@ Attention: DONT USE triple dots like "..." Include all necessary information!
 """,
 "FORMAT_EXAMPLE": """
 ---
-
-
-## State classes
-```mermaid
-classDiagram
-    class SampleState {
-        listenTo([OtherSampleState,OtherSampleState2])
-        sampleMethod1()
-        AddAnotherInstanceSample()
-        ...
-    }
-    ...
-```
 
 ## File tree
 ```python
@@ -170,12 +191,52 @@ classDiagram
                     {
                         "sample_view_controller.dart":"Controller for sample_screen.dart"
                     },
+                "components":
+                    {
+                        "sample_button.dart": "Special button used for screens in this feature"
+                    },
                 }
             }
         }
     }
 ```
 
+## State classes
+```mermaid
+classDiagram
+    class SampleState {
+        listenTo([OtherSampleState,OtherSampleState2])
+        sampleMethod1()
+        AddAnotherInstanceSample()
+        ...
+    }
+    ...
+```
+
+## Controller
+```mermaid
+classDiagram
+    class SampleController {
+        listenTo([OtherSampleState,OtherSampleState2])
+        sampleMethod1()
+        AddAnotherInstanceSample()
+        validateSampleTextInput1()
+        ...
+    }
+    ...
+```
+
+## Screens
+```mermaid
+classDiagram
+    class SampleScreen extends StatelessConsumer {
+        listenTo([SampleController])
+        onSampleButtonClick1()
+        onTextEdited2()
+        ...
+    }
+    ...
+```
 
  ## Device API classes
 ```mermaid
@@ -201,8 +262,10 @@ The requirement is clear to me.
 }
 
 OUTPUT_MAPPING = {
-    "State classes": (str, ...),
     "File tree": (Dict[str,Dict], ...),
+    "State classes": (str, ...),
+    "Controller": (str, ...),
+    "Screens": (str, ...),
     "Device API classes": (str, ...),
     "Anything UNCLEAR": (str, ...),
 }
@@ -213,7 +276,7 @@ class WriteFlutterFrontendDesign(Action):
         logger.info("Init Frontend Design")
         super().__init__(name, context, llm)
         self.desc = (
-            "Based on the Architecture Design, think about the frontend system design, and design the corresponding flutter project file structure, domain, state classes, screens, components and view controller."
+            "Based on the Architecture Design, think about the frontend system design, and design the corresponding flutter project file structure, domain, states, screens, components and view controller."
             "Use the Riverpod state management library for state classes and view controllers."
             "Please provide your design, feedback clearly and in detail."
         )

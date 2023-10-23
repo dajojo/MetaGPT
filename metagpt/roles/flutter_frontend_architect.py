@@ -21,6 +21,7 @@ from metagpt.logs import logger
 from metagpt.utils.json_to_markdown import json_to_markdown
 from metagpt.utils.common import CodeParser
 from metagpt.utils.mermaid import mermaid_to_file
+from metagpt.flutter_common import get_workspace
 
 
 class FlutterFrontendArchitect(Role):

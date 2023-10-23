@@ -16,15 +16,17 @@ from metagpt.actions.flutter_frontend_design_api import WriteFlutterFrontendDesi
 from metagpt.actions.flutter_project_management import WriteFlutterTasks
 from metagpt.actions.write_flutter_code import WriteFlutterCode
 from metagpt.actions.write_flutter_data_class_code import WriteFlutterDataClassCode
+from metagpt.actions.write_flutter_repository_class_code import WriteFlutterRepositoryClassCode
+from metagpt.actions.write_flutter_screen_class_code import WriteFlutterScreenClassCode
 from metagpt.actions.write_flutter_state_class_code import WriteFlutterStateClassCode
 from metagpt.const import WORKSPACE_ROOT
 from metagpt.logs import logger
 from metagpt.roles import Role
-from metagpt.roles.product_manager import get_workspace
 from metagpt.schema import Message
 from metagpt.utils.common import CodeParser
 from metagpt.utils.special_tokens import FILENAME_CODE_SEP, MSG_SEP
-
+from metagpt.flutter_common import get_workspace
+import re
 
 async def gather_ordered_k(coros, k) -> list:
     tasks = OrderedDict()
@@ -102,6 +104,40 @@ class FlutterEngineer(Role):
             return system_design_msg.instruct_content.dict().get("Flutter package name").strip().strip("'").strip('"')
         return CodeParser.parse_str(block="Flutter package name", text=system_design_msg.content)
 
+    def get_class_spec(self,class_name, markdown_content):
+        # Regular expression to extract the class specification
+        pattern = r'class {}{{(.*?)}}'.format(class_name)
+        match = re.search(pattern, markdown_content, re.DOTALL)
+        
+        # If match is found, return the specification, otherwise return None
+        if match:
+            class_spec = "class {}{{".format(class_name) + match.group(1) + "}"
+            return class_spec.strip()
+        else:
+            return None
+
+    def get_file_tree(self,markdown_content):
+        lines = markdown_content.split("\n")
+        
+        tree = []
+
+        for line in lines:
+            if "## State classes" in line:
+                break
+            tree.append(line)
+
+        return "\n".join(tree)
+
+
+    def read_markdown_file(self,filename):
+        with open(filename, 'r') as file:
+            content = file.read()
+        return content
+
+
+
+
+
     def write_file(self, filename: str, code: str):
         workspace = get_workspace(self)
         filename = filename.replace('"', "").replace("\n", "")
@@ -140,16 +176,58 @@ class FlutterEngineer(Role):
 
     async def _act_sp(self) -> Message:
         code_msg_all = []  # gather all code info, will pass to qa_engineer for tests later
+        ws = get_workspace(self)
+
+        frontend_sys_spec = self.read_markdown_file(ws/ "docs"/ "frontend_system_design.md")
+        tree = self.get_file_tree(frontend_sys_spec)
+
         for todo in self.todos:
             if "/domain/" in todo:
                 ## data class
-                code = await WriteFlutterDataClassCode().run(context=self._rc.history, filename=todo)
+                data_class = Path(todo).name
+                sys_spec = self.read_markdown_file(ws/ "docs"/ "system_design.md")
+                class_spec = self.get_class_spec(data_class,sys_spec)
+                if class_spec != None:
+                    context = tree +"\n"+class_spec
+                else:
+                    context = self._rc.history
+                code = await WriteFlutterDataClassCode().run(context=context, filename=todo)
+
+            if "/repositories/" in todo:
+                ## data class
+                data_class = Path(todo).name
+                sys_spec = self.read_markdown_file(ws/ "docs"/ "system_design.md")
+                class_spec = self.get_class_spec(data_class,sys_spec)
+                if class_spec != None:
+                    context = tree +"\n"+class_spec
+                else:
+                    context = self._rc.history
+                code = await WriteFlutterRepositoryClassCode().run(context=context, filename=todo)
+
             elif "/states/" in todo:
-                code = await WriteFlutterStateClassCode().run(context=self._rc.history, filename=todo)
+                state_class = Path(todo).name
+                class_spec = self.get_class_spec(state_class,frontend_sys_spec)
+                if class_spec != None:
+                    context = tree +"\n"+class_spec
+                else:
+                    context = self._rc.history
+                code = await WriteFlutterStateClassCode().run(context=context, filename=todo)
+
+            elif "/screens/" in todo:
+                state_class = Path(todo).name
+                class_spec = self.get_class_spec(state_class,frontend_sys_spec)
+                if class_spec != None:
+                    context = tree +"\n"+class_spec
+                else:
+                    context = self._rc.history
+                code = await WriteFlutterScreenClassCode().run(context=context, filename=todo)
+
             else:
+                logger.warning(f"Attention! Using Generic Flutter Code writing for {todo}")
                 code = await WriteFlutterCode().run(context=self._rc.history, filename=todo)
+            
             logger.info(todo)
-            logger.info(code)
+            #logger.info(code)
 
             file_path = self.write_file(todo, code)
             msg = Message(content=code, role=self.profile, cause_by=type(self._rc.todo))
