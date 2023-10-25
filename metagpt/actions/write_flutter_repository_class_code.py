@@ -21,6 +21,9 @@ NOTICE
 Role: You are a professional engineer; the main goal is to write compliant, elegant, modular, easy sample to read and maintain nullsafe dart code
 ATTENTION: Use '##' to SPLIT SECTIONS, not '#'. Output format carefully referenced "Format example".
 
+## Context
+{context}
+-----
 ## Code: {filename} Write code with triple quote, based on the following list and context.
 1. Do your best to implement THIS ONLY ONE FILE. ONLY USE EXISTING API. IF NO API, IMPLEMENT IT.
 2. Requirement: Based on the context, implement one following code file, note to return only in code form, your code will be part of the entire project, so please implement complete, reliable, reusable code snippets
@@ -30,15 +33,36 @@ ATTENTION: Use '##' to SPLIT SECTIONS, not '#'. Output format carefully referenc
 6. Think before writing: What should be implemented and provided in this document?
 7. ONLY IMPLEMENT ONE REPOSITORY CLASS PER FILE.
 8. Never include any functions
+9. 'Sample' refers to a placeholder. DO NOT include this in the final output
+
 -----
-# Context
-{context}
------
-## Format example
+## Existing Code
+The following is the existing code. Try to achieve all goals using minimal changes.
 -----
 ## Code: {filename}
 ```dart
-## {filename}
+{code}
+```
+## Format example
+Use the following as an example. The code response MUST look like this but REPLACE everything containing 'Sample' and insert the code which solves the tasks.
+
+-----
+## Code: {filename}
+```dart
+/// {filename}
+/// This file contains... 
+/// classdiagramm:
+/// class SampleRepository
+///  +void methodSample(sampleField1)
+/// ...
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:float_core/core/utils/debug_tools.dart';
+import 'package:float_core/core/utils/logger.dart';
+import 'package:float_core/core/response/api_response.dart';
+import 'package:float_apis/db/db_exception.dart';
+import 'package:float_apis/db/entity/entity_list_state_notifier.dart';
+import 'package:float_apis/db/entity/entity_state_notifier.dart';
+
 class SampleSerializer extends EntitySerializer<Sample> {{
   @override
   Sample beforeCreate(Sample e) {{
@@ -128,10 +152,10 @@ class WriteFlutterRepositoryClassCode(Action):
         return code
 
 
-    async def run(self, context, filename):
+    async def run(self, context,code, filename):
         ### only load mermaid class def as context
 
-        prompt = PROMPT_TEMPLATE.format(context=context, filename=filename)
+        prompt = PROMPT_TEMPLATE.format(context=context,code=code, filename=filename)
         logger.info(f'Writing Repository class {filename}..')
         code = await self.write_code(prompt)
         return code,prompt

@@ -40,29 +40,29 @@ class FlutterArchitect(Role):
         super().__init__(name, profile, goal, constraints)
 
         # Initialize actions specific to the Architect role
-        self._init_actions([WriteFlutterDesign,WriteFlutterDesignReview])
+        self._init_actions([WriteFlutterDesign])
 
         # Set events or actions the Architect should watch or be aware of
         self._watch({WritePRD})
 
 
     async def _save_system_design(self, docs_path, resources_path, system_design):
-        data_classes = system_design.instruct_content.dict()[
-            "Data classes"
-        ]  # CodeParser.parse_code(block="Data structures and interface definitions", text=content)
-        repository_classes = system_design.instruct_content.dict()[
-            "Repository classes"
-        ]  # CodeParser.parse_code(block="Program call flow", text=content)
+        # data_classes = system_design.instruct_content.dict()[
+        #     "Data classes"
+        # ]  # CodeParser.parse_code(block="Data structures and interface definitions", text=content)
+        # repository_classes = system_design.instruct_content.dict()[
+        #     "Repository classes"
+        # ]  # CodeParser.parse_code(block="Program call flow", text=content)
 
-        if False:
-            await mermaid_to_file(data_classes, resources_path / "data_classes")
-            await mermaid_to_file(repository_classes, resources_path / "rep_classes")            
+        # if False:
+        #     await mermaid_to_file(data_classes, resources_path / "data_classes")
+        #     await mermaid_to_file(repository_classes, resources_path / "rep_classes")            
         
         system_design_file = docs_path / "system_design.md"
-        logger.info(f"Saving System Designs to {system_design_file}")
+        logger.info(f"Saving System Designs {system_design} to {system_design_file}")
 
         try:
-            system_design_file.write_text((json_to_markdown(system_design.instruct_content.dict())))
+            system_design_file.write_text(system_design)
             logger.info(f"Saved System Designs successfully")
 
         except Exception as e:
@@ -100,6 +100,6 @@ class FlutterArchitect(Role):
         ws = get_workspace(self)        
         logger.info(f"Workspace: {ws}")
 
-        await self._save(ws,context,msg)
+        await self._save(ws,context,response)
 
         return msg

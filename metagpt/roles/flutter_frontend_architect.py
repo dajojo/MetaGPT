@@ -53,17 +53,17 @@ class FlutterFrontendArchitect(Role):
 
 
     async def _save_system_design(self, docs_path, resources_path, system_design):
-        data_classes = system_design.instruct_content.dict()[
-            "State classes"
-        ]  # CodeParser.parse_code(block="Data structures and interface definitions", text=content)
-        repository_classes = system_design.instruct_content.dict()[
-            "Device API classes"
-        ]  # CodeParser.parse_code(block="Program call flow", text=content)
-        await mermaid_to_file(data_classes, resources_path / "state_classes")
-        await mermaid_to_file(repository_classes, resources_path / "device_api_classes")
+        # data_classes = system_design.instruct_content.dict()[
+        #     "State classes"
+        # ]  # CodeParser.parse_code(block="Data structures and interface definitions", text=content)
+        # repository_classes = system_design.instruct_content.dict()[
+        #     "Device API classes"
+        # ]  # CodeParser.parse_code(block="Program call flow", text=content)
+        # await mermaid_to_file(data_classes, resources_path / "state_classes")
+        # await mermaid_to_file(repository_classes, resources_path / "device_api_classes")
         system_design_file = docs_path / "frontend_system_design.md"
-        logger.info(f"Saving System Designs to {system_design_file}")
-        system_design_file.write_text((json_to_markdown(system_design.instruct_content.dict())))
+        logger.info(f"Saving System Designs {system_design} to {system_design_file}")
+        system_design_file.write_text((system_design))
 
     async def _save(self,workspace, context, system_design):
         logger.info("Saving Frontend Design")
@@ -90,6 +90,6 @@ class FlutterFrontendArchitect(Role):
         ws = get_workspace(self)  
         logger.info(f"Workspace: {ws}")
 
-        await self._save(ws,context,msg)
+        await self._save(ws,context,response)
 
         return msg

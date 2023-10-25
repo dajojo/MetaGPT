@@ -24,6 +24,7 @@ from metagpt.actions.write_code import WriteCode
 from metagpt.actions.write_code_review import WriteCodeReview
 from metagpt.actions.write_flutter_code import WriteFlutterCode
 from metagpt.actions.write_flutter_data_class_code import WriteFlutterDataClassCode
+from metagpt.actions.write_flutter_dependencies import WriteFlutterDependencies
 from metagpt.actions.write_flutter_repository_class_code import WriteFlutterRepositoryClassCode
 from metagpt.actions.write_flutter_screen_class_code import WriteFlutterScreenClassCode
 from metagpt.actions.write_flutter_state_class_code import WriteFlutterStateClassCode
@@ -43,6 +44,7 @@ class ActionType(Enum):
     DESIGN_REVIEW = DesignReview
     DESIGN_FILENAMES = DesignFilenames
     WRTIE_CODE = WriteCode
+    WRITE_FLUTTER_DEPENDENCIES = WriteFlutterDependencies
     WRTIE_FLUTTER_CODE = WriteFlutterCode
     WRITE_FLUTTER_DATA_CLASS_CODE = WriteFlutterDataClassCode
     WRITE_FLUTTER_STATE_CLASS_CODE = WriteFlutterStateClassCode

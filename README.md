@@ -2,16 +2,13 @@
 
 ### Structure
 
-1. Product Manager
-    - Describes Goals and User Stories, ...
-
-2. Flutter Architect
-    - NEW: Feature List -> Divides the whole project in individual Features
-    - NEW: classDiagram -> Write freezed like class definition
-    - NEW: Define repositories
-
-
-
+## TODO:
+    - For existing code create an explore, plan and execute plan.
+      - First explore the whole project. Document the code and files
+      - Plan the required the changes to fulfill the requirements
+        - In the task list specify:
+          - Order, Name, Description, Tools
+      - execute the changes
 
 
 # MetaGPT: The Multi-Agent Framework

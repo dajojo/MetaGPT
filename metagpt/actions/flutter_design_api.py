@@ -20,57 +20,6 @@ from metagpt.utils.mermaid import mermaid_to_file
 from metagpt.schema import Message
 
 templates = {
-        "json": {
-        "PROMPT_TEMPLATE": """
-# Context
-{context}
-
-## Format example
-{format_example}
------
-Role: You are an architect; the goal is to design a SOTA Flutter system; make the best use of good open source tools
-Requirement: Fill in the following missing information based on the context, each section name is a key in json
-Max Output: 8192 chars or 2048 tokens. Try to use them up.
-Attention: DONT USE triple dots like "..." Include all necessary information!
-
-## Implementation approach: Provide as Plain text. Analyze the difficult points of the requirements, select the appropriate open-source framework.
-
-## Feature list: Provided as Python dict[str,str], the keys represent the individual app specific features that are needed and have at least one dedicated screen and a dedicated function (DONT INCLUDE COMMON and OBVIOUS FEATURES SUCH AS 'Connection Service' or 'User Interface'). The values contain a brief description for each feature about the functionality and the assigned data classes, and functions. Each data and state class can be assigned to only one feature. Use lower_snake_case.
-
-## Data classes: Use classDiagram code syntax, including classes (with type annotations), CLEARLY MARK the RELATIONSHIPS between classes, and comply with professional standards. The data structures SHOULD BE VERY DETAILED and the API should be comprehensive with a complete design. 
-
-## Repository classes: Use classDiagram code syntax, including a Repository for each dataclass defining a communication interface to the backend (with type annotations), CLEARLY MARK the RELATIONSHIPS between classes, and comply with professional standards. The data structures SHOULD BE VERY DETAILED and the API should be comprehensive with a complete design. 
-
-## Anything UNCLEAR: Provide as Plain text. Make clear here.
-
-output a properly formatted JSON, wrapped inside [CONTENT][/CONTENT] like format example,
-and only output the json inside this tag, nothing else
-""",
-        "FORMAT_EXAMPLE": """
-[CONTENT]
-{
-    "Implementation approach": "We will ...",
-    "Feature list": {"sample_feature" : "Used to for ....  Functions: ... , Data classes ..."},
-    "Data classes": '
-    classDiagram
-        class Game{
-            int score
-        }
-        ...
-    ',
-    "Repository classes": '
-    classDiagram
-        GameRepository{
-            create(Game) -> Game
-            get(Game) -> Game
-        }
-        ...
-    ',
-    "Anything UNCLEAR": "The requirement is clear to me."
-}
-[/CONTENT]
-""",
-    },
     "markdown": {
         "PROMPT_TEMPLATE": """
 # Context
@@ -101,9 +50,15 @@ Attention: DONT USE triple dots like "..." Include all necessary information!
 We will ...
 
 ## Feature list
-```python
-    {"sample_feature" : "Used to for ....  Functions: ... , Data classes ..."}
-```
+- sample_feature:
+    - Used to for ....  
+    - Functions: ... 
+    - Data classes: ...
+
+- sample_feature2:
+    - Used to for ....  
+    - Functions: ... 
+    - Data classes: ...
 
 ## Data classes
 ```mermaid
@@ -149,10 +104,10 @@ class WriteFlutterDesign(Action):
             "clearly and in detail."
         )
 
-    async def run(self, context, format=CONFIG.prompt_format):
+    async def run(self, context, format="markdown"):
         prompt_template, format_example = get_template(templates, format)
         prompt = prompt_template.format(context=context, format_example=format_example)
 
-        system_design = await self._aask_v1(prompt, "system_design", OUTPUT_MAPPING, format=format)
+        system_design = await self._aask(prompt)
         
         return system_design

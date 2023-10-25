@@ -18,6 +18,10 @@ NOTICE
 Role: You are a professional engineer; the main goal is to write compliant, elegant, modular, easy to read and maintain nullsafe dart code
 ATTENTION: Use '##' to SPLIT SECTIONS, not '#'. Output format carefully referenced "Format example".
 
+## Context
+{context}
+-----
+
 ## Code: {filename} Write code with triple quote, based on the following list and context.
 1. Do your best to implement THIS ONLY ONE FILE. ONLY USE EXISTING API. IF NO API, IMPLEMENT IT.
 2. Requirement: Based on the context, implement one following code file, note to return only in code form, your code will be part of the entire project, so please implement complete, reliable, reusable code snippets
@@ -28,53 +32,38 @@ ATTENTION: Use '##' to SPLIT SECTIONS, not '#'. Output format carefully referenc
 7. CAREFULLY CHECK THAT YOU DONT MISS ANY NECESSARY CLASS/FUNCTION IN THIS FILE.
 8. ONLY IMPLEMENT ONE STATE CLASS PER FILE. DON'T FORGET the provider variable
 9. Use the ResponseCollection if the state holds a list of data entities. 
-10. For states that require a list of elements, USE RESPONSE COLLECTION. It provides helpful tools and handles the next token it contains:
-```
-const factory ResponseCollection(
-    {{@Default([]) List<T> items,
-    ApiResponse? lastResponse,
-    Object? nextToken}}) = _ResponseCollection;
-
-ResponseCollection<T> appendQueriedList(
-    ApiResponse<QueriedList<T>, dynamic> queriedListResponse,
-    {{required Function(T object) identifier,
-    Function(T object)? deleted,
-    bool atEnd = false}}) 
-
-ResponseCollection<T> appendQueriedItem(ApiResponse<T, dynamic> newItem,
-    {{required Function(T object) identifier,
-    Function(T object)? deleted,
-    bool ascending = false}})
-
-ResponseCollection<T> appendList(List<T> newList,
-    {{required Function(T object) identifier,
-    Function(T object)? deleted,
-    bool atEnd = false}})
-
-ResponseCollection<T> appendItem(T newItem,
-    {{required Function(T object) identifier,
-    Function(T object)? deleted,
-    bool ascending = false}})
-
-ResponseCollection<T> sort(int Function(T, T) compare)
-
-ResponseCollection<V> map<V>(V Function(T) toElement)
-
-T operator [](int index)
-
-int get length => items.length;
-```
+10. 'Sample' refers to a placeholder. DO NOT include this in the final output
+11. For states that require a list of elements, USE RESPONSE COLLECTION. It provides helpful tools and handles the next token it contains:
 -----
-# Context
-{context}
------
-## Format example
+
+## Existing Code
+The following is the existing code. Try to achieve all goals using minimal changes.
 -----
 ## Code: {filename}
 ```dart
-## {filename}
+{code}
+```
+## Format example
+Use the following as an example. The code response MUST look like this but REPLACE everything containing 'Sample' and insert the code which solves the tasks.
+-----
+## Code: {filename}
+```dart
+/// {filename}
+/// This file contains... 
+/// classdiagramm:
+/// class SampleState
+///  +void methodSample(sampleField1)
+/// ...
+
 import 'package:float_core/core/queried_list_collection/response_collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:float_core/core/utils/debug_tools.dart';
+import 'package:float_core/core/utils/logger.dart';
+import 'package:float_core/core/response/api_response.dart';
+import 'package:float_apis/db/db_exception.dart';
+import 'package:float_apis/db/entity/entity_list_state_notifier.dart';
+import 'package:float_apis/db/entity/entity_state_notifier.dart';
 
 final samplesStateProvider =
     StateNotifierProvider<SamplesState, ResponseCollection<Sample>>(
@@ -181,8 +170,8 @@ class WriteFlutterStateClassCode(Action):
         code = CodeParser.parse_code(block="", text=code_rsp)
         return code
 
-    async def run(self, context, filename):
-        prompt = PROMPT_TEMPLATE.format(context=context, filename=filename)
+    async def run(self, context,code,filename):
+        prompt = PROMPT_TEMPLATE.format(context=context, filename=filename, code=code)
         logger.info(f'Writing state class {filename}..')
         code = await self.write_code(prompt)
         # code_rsp = await self._aask_v1(prompt, "code_rsp", OUTPUT_MAPPING)

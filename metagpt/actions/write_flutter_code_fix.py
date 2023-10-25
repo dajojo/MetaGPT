@@ -17,23 +17,11 @@ NOTICE
 Role: You are a professional software engineer, and your main task is to review the code. You need to ensure that the code conforms to the standards, is elegantly designed and modularized, easy to read and maintain, and is written in NULLSAFE dart.
 ATTENTION: Use '##' to SPLIT SECTIONS, not '#'. Output format carefully referenced "Format example".
 
-
-## Initial Prompt
-{initial_prompt}
-
-## Code Review: Based on the following context and code, and following the check list, Provide key, clear, concise, and specific code modification suggestions, up to 5. Be very strict!
-```
-1. Check 0: Is the code implemented as per the requirements?
-2. Check 1: Are there any issues with the code logic?
-3. Check 2: Does the existing code follow the design definitions?
-4. Check 3: Is there a function in the code that is omitted or not fully implemented that needs to be implemented?
-5. Check 4: Does the code have unnecessary or lack of dependencies? Are all implements included?
-6. Check 5: Is the code sufficiently documented? Triple dots are now allowed. Make sure all functions and classes are listed.
-```
-
-## Rewrite Code: {filename} Based on 'Code Review' and 'Code' and the 'Initial Prompt', rewrite code with triple quotes. Do your utmost to optimize THIS SINGLE FILE. If there are no issues, don't change anything!
-
+## Fix Code: {filename} Base on 'Suggested Change' and 'Code', rewrite code with triple quotes. Do your utmost to optimize THIS SINGLE FILE. 
 -----
+# Suggested Change
+{change}
+
 ## Code: {filename}
 ```
 {code}
@@ -58,18 +46,13 @@ FORMAT_EXAMPLE = """
 
 ## Rewrite Code: {filename}
 ```dart
-/// This file contains... 
-/// classdiagramm:
-/// class Sample
-/// ...
-
 ...
 ```
 """
 
 
-class WriteFlutterCodeReview(Action):
-    def __init__(self, name="WriteFlutterCodeReview", context: list[Message] = None, llm=None):
+class WriteFlutterCodeFix(Action):
+    def __init__(self, name="WriteFlutterCodeFix", context: list[Message] = None, llm=None):
         super().__init__(name, context, llm)
 
     @retry(stop=stop_after_attempt(2), wait=wait_fixed(1))
@@ -78,9 +61,9 @@ class WriteFlutterCodeReview(Action):
         code = CodeParser.parse_code(block="", text=code_rsp)
         return code
 
-    async def run(self, context,initial_prompt, code, filename):
+    async def run(self, context,change, code, filename):
         format_example = FORMAT_EXAMPLE.format(filename=filename)
-        prompt = PROMPT_TEMPLATE.format(context=context,initial_prompt=initial_prompt, code=code, filename=filename, format_example=format_example)
+        prompt = PROMPT_TEMPLATE.format(context=context,change=change, code=code, filename=filename, format_example=format_example)
         logger.info(f'Code review {filename}..')
         code = await self.write_code(prompt)
         return code

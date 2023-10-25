@@ -12,7 +12,8 @@ from metagpt.logs import logger
 from metagpt.schema import Message
 from metagpt.actions.action_output import ActionOutput
 import subprocess
-from metagpt.flutter_common import get_workspace, get_workspace_name
+from metagpt.flutter_common import get_workspace
+from metagpt.const import WORKSPACE_ROOT
 
 class ProductManager(Role):
     """
@@ -59,28 +60,53 @@ class ProductManager(Role):
         if msg.instruct_content:
             try:
                 logger.info(f"Saving PRD to {prd_file}")
-                #logger.info(f"MD: {json_to_markdown(msg.instruct_content.dict())}")
                 prd_file.write_text(json_to_markdown(msg.instruct_content.dict()))
             except Exception as e:
                 logger.error(f"Error at saving PRD: {e}")
 
 
     async def _create_project(self):
-        ws_name = get_workspace_name(self)
+        ws = get_workspace(self)        
         try:
-            await subprocess.run(["flutter", "create",ws_name]) 
+            subprocess.run(["flutter", "create",ws]) 
+
+            packages_path = ws / "packages"
+            packages_path.mkdir(parents=True, exist_ok=True)
+
+            core_path = packages_path / "float_core"
+            apis_path = packages_path / "float_apis"
+
+            core_path.mkdir(parents=True, exist_ok=True)
+            apis_path.mkdir(parents=True, exist_ok=True)
+
+            subprocess.run(["git", "clone","https://github.com/appBizniz/float_core.git",core_path]) 
+            subprocess.run(["git", "clone","https://github.com/appBizniz/float_apis.git",apis_path]) 
+
+            subprocess.run(["flutter","pub", "get",ws])
+
+
+            subprocess.run(["flutter","pub", "get",core_path])
+            subprocess.run(["flutter","pub", "get",apis_path])
+
+
+            subprocess.run(["flutter","pub", "get",ws])
+
+
         except Exception as e:
             logger.error(f"Error at creating Project: {e}")
 
 
 
     async def _save(self,workspace, context, msg):
+        await self._create_project()
+
+
         docs_path = workspace / "docs"
         resources_path = workspace / "resources"
         docs_path.mkdir(parents=True, exist_ok=True)
         resources_path.mkdir(parents=True, exist_ok=True)
         await self._save_prd(docs_path, resources_path, msg)
-        await self._create_project()
+
 
 
 
