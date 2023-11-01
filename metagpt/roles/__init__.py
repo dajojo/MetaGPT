@@ -12,6 +12,7 @@ from metagpt.roles.flutter_architect import FlutterArchitect
 from metagpt.roles.flutter_frontend_architect import FlutterFrontendArchitect
 from metagpt.roles.project_manager import ProjectManager
 from metagpt.roles.flutter_project_manager import FlutterProjectManager
+from metagpt.roles.flutter_documentator import FlutterDocumentator
 from metagpt.roles.product_manager import ProductManager
 from metagpt.roles.engineer import Engineer
 from metagpt.roles.flutter_engineer import FlutterEngineer
@@ -34,6 +35,7 @@ __all__ = [
     "FlutterEngineer",
     "QaEngineer",
     "FlutterQaEngineer",
+    "FlutterDocumentator",
     "Searcher",
     "Sales",
     "CustomerService",
