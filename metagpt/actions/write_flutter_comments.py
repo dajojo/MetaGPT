@@ -22,36 +22,36 @@ ATTENTION: Use '##' to SPLIT SECTIONS, not '#'. Output format carefully referenc
 {context}
 -----
 ## Existing Code
-The following is the existing code. Add Documentation according to professional standards in markdown format.
+The following is the existing code. Add Documentation comments according to the Flutter "dartdoc" standards. DO NOT CHANGE THE CODE!
 -----
 ## Code: {filename}
 ```dart
 {code}
 ```
 ## Format example:
-Use the following as an example. Write the documentation for each file with respect to the code and the written documentation in context. Use simple markdown elements.
+Use the following as an example. DO NOT ALTER THE given CODE. Only add documentation comments as described in the following
 -----
 ## Code: {filename}
-```markdown
-Certainly! Below is an example of how you could structure a Markdown document to provide documentation for a Dart class as part of a Flutter project, without including the code itself:
+```dart
+/// {filename}
+/// This is truly an amazing library.
+/// {{@hideConstantImplementations}}
 
-```markdown
-# `CustomButton` Class
+/// This top level constant will not show its implementation.
+const a = 7;
 
-The `CustomButton` class is a part of the Flutter project to provide a customizable button widget. This widget extends the Material button and adds additional styling and functionality.
+/// {{@hideConstantImplementations}}
+class A {{
+  /// This constant will not show its implementation.
+  static const aConst = 12;
+}}
 
-## Properties
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `text` | `String` | The text displayed on the button. |
-| `onPressed` | `Function` | The callback that is called when the button is tapped. |
-
-## Methods
-
-### `void handleTap()`
-
-Handles the tap event and triggers the `onPressed` callback.
+class B {{
+  /// Despite the library directive, because this is a class
+  /// member and there is no hideConstantImplementations
+  /// directive on the class, we will show this implementation.
+  static const bConst = 27; 
+}}
 ...
 ```
 -----
@@ -64,11 +64,12 @@ Handles the tap event and triggers the `onPressed` callback.
 6. **Enum Types Documentation**: Document any enumerated types and their values.
 7. **Exception Documentation**: Document any exceptions that could be thrown.
 8. **Deprecation Notices**: If applicable, include notices for deprecated code.
+9. **Keep Code**: DO NOT CHANGE THE CODE. YOU ARE ONLY ALLOWED TO ADD THE DOCUMENTATION AS COMMENTS.
 """
 
 
-class WriteFlutterDocumentation(Action):
-    def __init__(self, name="WriteFlutterDocumentation", context: list[Message] = None, llm=None):
+class WriteFlutterComments(Action):
+    def __init__(self, name="WriteFlutterComments", context: list[Message] = None, llm=None):
         super().__init__(name, context, llm)
 
     @retry(stop=stop_after_attempt(2), wait=wait_fixed(1))

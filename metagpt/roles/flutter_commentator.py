@@ -25,7 +25,6 @@ from metagpt.actions.write_flutter_code_review import WriteFlutterCodeReview
 from metagpt.actions.write_flutter_data_class_code import WriteFlutterDataClassCode
 from metagpt.actions.write_flutter_dependencies import WriteFlutterDependencies
 from metagpt.actions.write_flutter_comments import WriteFlutterComments
-from metagpt.actions.write_flutter_documentation import WriteFlutterDocumentation
 from metagpt.actions.write_flutter_repository_class_code import WriteFlutterRepositoryClassCode
 from metagpt.actions.write_flutter_screen_class_code import WriteFlutterScreenClassCode
 from metagpt.actions.write_flutter_state_class_code import WriteFlutterStateClassCode
@@ -41,7 +40,7 @@ import subprocess
 
 
 
-class FlutterDocumentator(Role):
+class FlutterCommentator(Role):
     """
     Represents an Engineer role responsible for writing and possibly reviewing code.
 
@@ -58,7 +57,7 @@ class FlutterDocumentator(Role):
     def __init__(
         self,
         name: str = "Chris",
-        profile: str = "FlutterDocumentator",
+        profile: str = "FlutterCommentator",
         goal: str = "Write elegant, readable, extensible, efficient Documentation",
         constraints: str = "The code should conform to standards and be modular and maintainable",
         n_borg: int = 1,
@@ -66,10 +65,10 @@ class FlutterDocumentator(Role):
     ) -> None:
         """Initializes the Engineer role with given attributes."""
         super().__init__(name, profile, goal, constraints)
-        self._init_actions([WriteFlutterDocumentation])
+        self._init_actions([WriteFlutterComments])
         self.use_code_review = use_code_review
         if self.use_code_review:
-            self._init_actions([WriteFlutterDocumentation, WriteFlutterCodeReview])
+            self._init_actions([WriteFlutterComments, WriteFlutterCodeReview])
         self._watch([BossRequirement])
         self.n_borg = n_borg
 
@@ -137,26 +136,17 @@ class FlutterDocumentator(Role):
         return content
 
 
-    def write_file(self, file_path, doc: str):
-        #workspace = get_workspace(self)
-        #filename = filename.replace('"', "").replace("\n", "")
-        #file = workspace / filename
-        file_path.parent.mkdir(parents=True, exist_ok=True)
-
-
-        content = ""
-
-        if file_path.exists():
-            content = file_path.read_text()
-
-        file_path.write_text(content + doc)
-        return file_path
+    def write_file(self, filename: str, code: str):
+        workspace = get_workspace(self)
+        filename = filename.replace('"', "").replace("\n", "")
+        file = workspace / filename
+        file.parent.mkdir(parents=True, exist_ok=True)
+        file.write_text(code)
+        return file
 
     async def _act_sp(self) -> Message:
         code_msg_all = []  # gather all code info, will pass to qa_engineer for tests later
         ws = get_workspace(self)
-
-        doc_path =  ws / "docs" / "doc.md"
 
         tasks_file = ws / "docs" / "tasks.md"
         todos = self.read_file(tasks_file)
@@ -176,17 +166,17 @@ class FlutterDocumentator(Role):
             if checked:
                 continue
 
-            doc = ""
+            code = ""
 
             try:
                 logger.info(f"Processing: {file_path}")
-                doc = self.read_file(ws/file_path)
-                logger.info(f"Code: {doc}")
+                code = self.read_file(ws/file_path)
+                logger.info(f"Code: {code}")
             except:
                 pass
 
             ### context...
-            doc, prompt = await WriteFlutterDocumentation().run(context=context, code=doc, filename=file_path)
+            code, prompt = await WriteFlutterComments().run(context=context, code=code, filename=file_path)
             #code, prompt = await globals()[operation]().run(context=task_context, code=code, filename=file_path)
 
             subprocess.run(["flutter","pub", "get",ws])
@@ -210,8 +200,8 @@ class FlutterDocumentator(Role):
             #         logger.error("code review failed!", e)
             #         pass
 
-            self.write_file(doc_path, doc)
-            msg = Message(content=doc, role=self.profile, cause_by=type(self._rc.todo))
+            file_path = self.write_file(file_path, code)
+            msg = Message(content=code, role=self.profile, cause_by=type(self._rc.todo))
             self._rc.memory.add(msg)
 
             code_msg = description + FILENAME_CODE_SEP + str(file_path)
